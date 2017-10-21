@@ -4,13 +4,6 @@ import wave
 import sys
 import tkinter as tk
 
-top = tk.Tk()
-top.geometry("600x300")
-frame1 = tk.Frame(top, width=600, height=300)
-frame1.pack_propagate(False)
-frame1.place(x=0,y=0)
-#code to add widgets will go here...
-
 def startCallBack():
 	CHUNK = 1024
 
@@ -38,15 +31,34 @@ def startCallBack():
 
 	p.terminate()
 
-start = tk.Button(frame1, text ="hello", bd = 5, command = startCallBack)
+top = tk.Tk()
+top.geometry("700x280")
 
+#frame1 = tk.Frame(top, width=600, height=300)
+#frame1.pack_propagate(False)
+#frame1.place(x=0,y=0)
+#code to add widgets will go here...
 
-start.pack()
-
-speechText = tk.Text(frame1, width=600, height=300)
+speechText = tk.Text(top, height=20)
 speechText.insert('1.0', 'hello world')
-speechText.pack()
-#frame1.geometry("300x300")
+#speechText.rowconfigure(0, weight=1)
+#speechText.columnconfigure(0, weight=2)
+speechText.grid(row=0, column=0, sticky='nsew', rowspan=10)
+
+startButton = tk.Button(top, text ="Start Speech", bd = 5, command = startCallBack, anchor='s')
+#startButton.grid_rowconfigure(0, weight=1)
+#startButton.grid_columnconfigure(0, weight=1)
+startButton.grid(row=0, column=1, sticky='s')
+
+analyseButton = tk.Button(top, text ="Analyse Text", bd = 5, anchor='n')
+#analyseButton.grid_rowconfigure(0, weight=1)
+#analyseButton.grid_columnconfigure(0, weight=1)
+analyseButton.grid(row=1, column=1, sticky='n')
+
+
+
+
+
 top.mainloop()
 
 
