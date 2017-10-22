@@ -4,47 +4,72 @@ import wave
 import sys
 import tkinter as tk
 import time
-
+from line import * 
+interval = 100
+def highlightSentence(currentLine):
+	speechText.tag_add("highlighted", "2.0","2." + str(currentLine.numChars + 1))
+	speechText.tag_config("highlighted", background="white", foreground="blue")
 def startCallBack():
-	CHUNK = 1024
+	speech = Speech(getAllText(speechText))
+	addCounterToTextbox(speechText)
+	line = speech.getnextline()
+	updateCounter(speechText, line.timeExpected)
+	speechText.after(interval, karaokeLoopCallback, speech, line)
+	highlightSentence(line)
+	# hightlight current sentence
 
-	#if len(sys.argv) < 2:
-	#    print("Plays a wave file.\n\nUsage: %s filename.wav" % sys.argv[0])
-	#    sys.exit(-1)
+def karaokeLoopCallback(speech, line):
+	if not line:
+		return
+	if line.timeExpected <= 0:
+		print(line.numChars)
+		lines = getAllText(speechText)#.strip('. ')
+		lines = lines[0:6] + lines[counterLen() + 1 + line.numChars:]
+		print(lines)
+		speechText.delete("1.0", tk.END)
+		speechText.insert('1.0', lines)
+		
+		line = speech.getnextline()
+		if not line:
+			return
+		
+		updateCounter(speechText, line.timeExpected)
+		highlightSentence(line)
+		#speech.delete("2.0", str((20+line.numchar())/10
+		# delete current sentence, highlight next sentence
+	else:
+		
+		print(line.timeExpected)
+		line.timeExpected -= interval 
+		updateCounter(speechText, line.timeExpected)
+	speechText.after(interval, karaokeLoopCallback, speech, line)
 
-	wf = wave.open('bensoundshort.wav', 'rb')
+def counterLen():
+	return 6
+def addCounterToTextbox(textbox):
+	textbox.insert('1.0', '00000\n')
 
-	p = pyaudio.PyAudio()
-
-	stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-		        channels=wf.getnchannels(),
-		        rate=wf.getframerate(),
-		        output=True)
-
-	data = wf.readframes(CHUNK)
-
-	while data != '':
-	    stream.write(data)
-	    data = wf.readframes(CHUNK)
-
-	stream.stop_stream()
-	stream.close()
-
-	p.terminate()
-
-def getSelectedText(textbox):
-	return textbox.get(tk.SEL_FIRST, tk.SEL_LAST)
+def updateCounter(textbox, val):
+	valstr = str(val).zfill(5)
+	textbox.delete('1.0','1.5')
+	textbox.insert('1.0', valstr)
 
 def getAllText(textbox):
 	return textbox.get("1.0",'end-1c')
+
+
+
 def colorCallback():
-	speechText.tag_config("word2", background="black", foreground="green")
+	speechText.delete("1.0", "1.4")
+	speechText.tag_config("word2",font = "Helvetica 44 bold", background="white", foreground="blue")
+
 def colourText():
 	speechText.tag_add("word1", "1.0", "1.4")
 	speechText.tag_add("word2", "1.4", "1.11")
-	speechText.tag_config("word1", background="black", foreground="green")
 	
-	speechText.after(1000, colorCallback)
+	speechText.tag_config("word1", background="white", foreground="blue")
+	
+	speechText.after(interval, colorCallback)
 
 def analyzeText():
 	try:
